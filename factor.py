@@ -45,7 +45,7 @@ class Price(FactorBase):
         dist = np.linalg.norm(vec1 - vec2)
         return (dist - self.scale)*self.alpha
 
-class Time(FactorBase):
+class TIME(FactorBase):
     def Compare(self,C):
         return (abs(self.data_end - C.data_end) - self.scale)*self.alpha
 
@@ -115,16 +115,26 @@ class MACD(FactorBase):
 
 def init_factor_set(S):
     out={}
-    out['M15'] = Price(*S['M15'])
-    out['M30'] = Price(*S['M30'])
-    out['H1'] = Price(*S['H1'])
-    out['H4'] = Price(*S['H4'])
-    out['D1'] = Price(*S['D1'])
-    out['W1'] = Price(*S['W1'])
-    out['Time'] =Time(*S['Time'])
-    out['MACD'] = MACD(*S['MACD'])
-    out['RSI'] = RSI(*S['RSI'])
-    out['EMA'] = EMA(*S['EMA'])
+    if S.get('M15'):
+        out['M15'] = Price(*S['M15'])
+    if S.get('M30'):
+        out['M30'] = Price(*S['M30'])
+    if S.get('H1'):
+        out['H1'] = Price(*S['H1'])
+    if S.get('H4'):
+        out['H4'] = Price(*S['H4'])
+    if S.get('D1'):
+        out['D1'] = Price(*S['D1'])
+    if S.get('W1'):
+        out['W1'] = Price(*S['W1'])
+    if S.get('TIME'):
+        out['TIME'] =TIME(*S['TIME'])
+    if S.get('MACD'):
+        out['MACD'] = MACD(*S['MACD'])
+    if S.get('RSI'):
+        out['RSI'] = RSI(*S['RSI'])
+    if S.get('EMA'):
+        out['EMA'] = EMA(*S['EMA'])
     return out
 
 def serialize_factor_set(S):
