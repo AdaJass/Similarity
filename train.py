@@ -1,8 +1,7 @@
 from category import *
 
 
-if __name__ == '__main__':
-    filebasename = './data/EURUSD'
+if __name__ == '__main__':    
     min_period = 'M15'
     day_change = 0.01
     df = pd.read_csv(os.path.join(os.path.dirname(os.path.realpath(__file__)), filebasename + '_'+min_period+'.csv'))  

@@ -4,6 +4,13 @@ import numpy as np
 import talib
 from datetime import datetime
 
+filebasename = './data/EURUSD'
+p_order = ['M15', 'M30', 'H1', 'H4', 'D1', 'W1']
+df_set = {}
+for p in p_order:
+    df_set[p] = pd.read_csv(os.path.join(os.path.dirname(os.path.realpath(__file__)), filebasename + '_' + p +'.csv'))  
+
+
 class FactorBase():
     def __init__(self, alpha, scale, data_id, data_file, data_start, data_end):
         self.alpha = alpha
@@ -31,7 +38,7 @@ class FactorBase():
 class Price(FactorBase):
     
     def LoadData(self):  
-        df = pd.read_csv(os.path.join(os.path.dirname(os.path.realpath(__file__)), self.data_file + '.csv'))  
+        df = df_set[self.data_file]  
         data = df[df.date>self.data_start]   
         data = data[data.date<self.data_end]     
         data['typical'] = data['close']/3 + data['high']/3 + data['low']/3
@@ -54,7 +61,7 @@ class TIME(FactorBase):
 
 class RSI(FactorBase):    
     def LoadData(self):
-        df = pd.read_csv(os.path.join(os.path.dirname(os.path.realpath(__file__)), self.data_file + '.csv'))
+        df = df_set[self.data_file]  
         data = df        
         dt_list = np.array(data['close'])
         dt = talib.RSI(dt_list)
@@ -74,7 +81,7 @@ class RSI(FactorBase):
 
 class EMA(FactorBase):    
     def LoadData(self):
-        data = pd.read_csv(os.path.join(os.path.dirname(os.path.realpath(__file__)), self.data_file + '.csv'))    
+        data = df_set[self.data_file]     
         dt_list = np.array(data['close'])
         dt = talib.EMA(dt_list)
         data['ind'] = dt
@@ -93,7 +100,7 @@ class EMA(FactorBase):
 
 class MACD(FactorBase):    
     def LoadData(self):
-        data =  pd.read_csv(os.path.join(os.path.dirname(os.path.realpath(__file__)), self.data_file + '.csv'))
+        data = df_set[self.data_file]  
         dt_list = np.array(data['close'])
         macd, macdsignal, macdhist = talib.MACD(dt_list)
         data['ind1'] = macd
@@ -151,4 +158,5 @@ def compare_factor_set(S1,S2):
     cmp=0.0
     for k in S1:
         cmp += S1[k].Compare(S2[k])
+    print(cmp)
     return cmp

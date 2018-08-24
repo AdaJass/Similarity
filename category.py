@@ -40,7 +40,7 @@ import pandas as pd
 import os
 import json
 from pathlib import Path
-from factor import init_factor_set, serialize_factor_set,compare_factor_set
+from factor import *
 from datetime import datetime
 
 
@@ -48,6 +48,10 @@ SubDir = './category/eur_m15/'
 f = open(SubDir+'cfg.json')
 cat_parameters = json.loads(f.read())
 f.close()
+# p_order = ['M15', 'M30', 'H1', 'H4', 'D1', 'W1']
+# df_set = {}
+# for p in p_order:
+#     df_set[p] = pd.read_csv(os.path.join(os.path.dirname(os.path.realpath(__file__)), filebasename + '_' + p +'.csv'))  
 
 def MakeCurrentSet(filebasename,current_time, min_period, day_change, macd_period='D1', rsi_period='D1', time_period='H1'):
     """make current data to a factor set
@@ -55,16 +59,13 @@ def MakeCurrentSet(filebasename,current_time, min_period, day_change, macd_perio
     Returns:
         json -- pickle like obj
     """
-    p_order = ['M15', 'M30', 'H1', 'H4', 'D1', 'W1']
     p_change={'M15':0.3, 'M30':0.3, 'H1':0.4, 'H4':0.5, 'D1':1}
     valid_p = p_order[p_order.index(min_period):]
-    df_set={}
     out = {
         'data': []       
     }
     f_set = {}
     for p in valid_p:
-        df_set[p] = pd.read_csv(os.path.join(os.path.dirname(os.path.realpath(__file__)), filebasename + '_' + p +'.csv'))  
         # import pdb;pdb.set_trace()
         c_index = df_set[p][df_set[p].date <= current_time].index[-1] 
         f_set[p]={}
@@ -72,7 +73,7 @@ def MakeCurrentSet(filebasename,current_time, min_period, day_change, macd_perio
         f_set[p]['alpha'] = cat_parameters[p+'_alpha'] 
         f_set[p]['scale'] = cat_parameters[p+'_scale'] 
         f_set[p]['data_id'] = p
-        f_set[p]['data_file'] = filebasename + '_' + p
+        f_set[p]['data_file'] = p
         s_index = c_index - cat_parameters[p+'_length']
         f_set[p]['data_start'] = df_set[p].iloc[s_index].date
         f_set[p]['data_end'] = df_set[p].iloc[c_index].date
@@ -90,7 +91,7 @@ def MakeCurrentSet(filebasename,current_time, min_period, day_change, macd_perio
     f_set['MACD']['alpha'] = cat_parameters['MACD_alpha'] 
     f_set['MACD']['scale'] = cat_parameters['MACD_scale'] 
     f_set['MACD']['data_id'] = 'MACD'
-    f_set['MACD']['data_file'] = filebasename + '_'+macd_period
+    f_set['MACD']['data_file'] = macd_period
     f_set['MACD']['data_start'] = f_set[macd_period]['data_start']
     f_set['MACD']['data_end'] = f_set[macd_period]['data_end']
 
@@ -98,7 +99,7 @@ def MakeCurrentSet(filebasename,current_time, min_period, day_change, macd_perio
     f_set['RSI']['alpha'] = cat_parameters['RSI_alpha'] 
     f_set['RSI']['scale'] = cat_parameters['RSI_scale'] 
     f_set['RSI']['data_id'] = 'RSI'
-    f_set['RSI']['data_file'] = filebasename + '_'+rsi_period
+    f_set['RSI']['data_file'] = rsi_period
     f_set['RSI']['data_start'] = f_set[rsi_period]['data_start']
     f_set['RSI']['data_end'] = f_set[rsi_period]['data_end']
 
@@ -106,7 +107,7 @@ def MakeCurrentSet(filebasename,current_time, min_period, day_change, macd_perio
     f_set['TIME']['alpha'] = cat_parameters['TIME_alpha'] 
     f_set['TIME']['scale'] = cat_parameters['TIME_scale'] 
     f_set['TIME']['data_id'] = 'TIME'
-    f_set['TIME']['data_file'] = filebasename + '_'+time_period
+    f_set['TIME']['data_file'] = time_period
     f_set['TIME']['data_start'] = f_set[time_period]['data_start']
     f_set['TIME']['data_end'] = f_set[time_period]['data_end']
 
@@ -135,6 +136,7 @@ def FindMatchCat(C):
                 count=count+1
                 cat_set = init_factor_set(S)                
                 result = compare_factor_set(cat_set, curent_set)
+                print('current compare with ',cat['_id'],', result is: ',result)
                 if result < cat_parameters['S']:
                     cat['data'].append(serialize_factor_set(curent_set))
                     breakout = True
@@ -160,7 +162,8 @@ def FindMatchCat(C):
                 
     if not breakout: 
         with open(SubDir+str(count)+'.pkl', 'wb') as f:  
-            # print(C)            
+            # print(C) 
+            C['_id'] = str(count)           
             pickle.dump(C, f)
         return curent_set
                 
