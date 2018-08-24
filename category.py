@@ -49,7 +49,7 @@ f = open(SubDir+'cfg.json')
 cat_parameters = json.loads(f.read())
 f.close()
 
-def MakeCurrentSet(filebasename,curent_time, min_period, day_change, macd_period='D1', rsi_period='D1', time_period='H1'):
+def MakeCurrentSet(filebasename,current_time, min_period, day_change, macd_period='D1', rsi_period='D1', time_period='H1'):
     """make current data to a factor set
     
     Returns:
@@ -60,18 +60,19 @@ def MakeCurrentSet(filebasename,curent_time, min_period, day_change, macd_period
     valid_p = p_order[p_order.index(min_period):]
     df_set={}
     out = {
-        'Data': []       
+        'data': []       
     }
     f_set = {}
     for p in valid_p:
         df_set[p] = pd.read_csv(os.path.join(os.path.dirname(os.path.realpath(__file__)), filebasename + '_' + p +'.csv'))  
-        c_index = df_set[p][df_set[p].date <= curent_time][-1] 
+        # import pdb;pdb.set_trace()
+        c_index = df_set[p][df_set[p].date <= current_time].index[-1] 
         f_set[p]={}
         #alpha, scale, data_id, data_file, data_start, data_end
         f_set[p]['alpha'] = cat_parameters[p+'_alpha'] 
         f_set[p]['scale'] = cat_parameters[p+'_scale'] 
         f_set[p]['data_id'] = p
-        f_set[p]['data_file'] = cat_parameters[filebasename + '_' + p] 
+        f_set[p]['data_file'] = filebasename + '_' + p
         s_index = c_index - cat_parameters[p+'_length']
         f_set[p]['data_start'] = df_set[p].iloc[s_index].date
         f_set[p]['data_end'] = df_set[p].iloc[c_index].date
@@ -85,24 +86,27 @@ def MakeCurrentSet(filebasename,curent_time, min_period, day_change, macd_period
             else:
                 out['Predict_'+p+'x4'] = {'up':0,'down':0,'null':1}
     
+    f_set['MACD']={}
     f_set['MACD']['alpha'] = cat_parameters['MACD_alpha'] 
     f_set['MACD']['scale'] = cat_parameters['MACD_scale'] 
     f_set['MACD']['data_id'] = 'MACD'
-    f_set['MACD']['data_file'] = cat_parameters[filebasename + '_'+macd_period] 
+    f_set['MACD']['data_file'] = filebasename + '_'+macd_period
     f_set['MACD']['data_start'] = f_set[macd_period]['data_start']
     f_set['MACD']['data_end'] = f_set[macd_period]['data_end']
 
+    f_set['RSI']={}
     f_set['RSI']['alpha'] = cat_parameters['RSI_alpha'] 
     f_set['RSI']['scale'] = cat_parameters['RSI_scale'] 
     f_set['RSI']['data_id'] = 'RSI'
-    f_set['RSI']['data_file'] = cat_parameters[filebasename + '_'+rsi_period] 
+    f_set['RSI']['data_file'] = filebasename + '_'+rsi_period
     f_set['RSI']['data_start'] = f_set[rsi_period]['data_start']
     f_set['RSI']['data_end'] = f_set[rsi_period]['data_end']
 
+    f_set['TIME']={}
     f_set['TIME']['alpha'] = cat_parameters['TIME_alpha'] 
     f_set['TIME']['scale'] = cat_parameters['TIME_scale'] 
     f_set['TIME']['data_id'] = 'TIME'
-    f_set['TIME']['data_file'] = cat_parameters[filebasename + '_'+time_period] 
+    f_set['TIME']['data_file'] = filebasename + '_'+time_period
     f_set['TIME']['data_start'] = f_set[time_period]['data_start']
     f_set['TIME']['data_end'] = f_set[time_period]['data_end']
 
@@ -126,7 +130,7 @@ def FindMatchCat(C):
     for x in Path(SubDir).iterdir():
         if x.is_file() and x.match('*.pkl'):  
             with open(str(x), 'rb') as f:
-                cat = pickle.loads(f) 
+                cat = pickle.load(f) 
             for S in cat['data']:
                 count=count+1
                 cat_set = init_factor_set(S)                
@@ -141,9 +145,9 @@ def FindMatchCat(C):
                     cat['Predict_M30x4']['up'] += C['Predict_M30x4']['up']
                     cat['Predict_M30x4']['down'] += C['Predict_M30x4']['down']
                     cat['Predict_M30x4']['null'] += C['Predict_M30x4']['null']
-                    cat['Predict_H1']['up'] += C['Predict_H1']['up']
-                    cat['Predict_H1']['down'] += C['Predict_H1']['down']
-                    cat['Predict_H1']['null'] += C['Predict_H1']['null']
+                    cat['Predict_H1x4']['up'] += C['Predict_H1x4']['up']
+                    cat['Predict_H1x4']['down'] += C['Predict_H1x4']['down']
+                    cat['Predict_H1x4']['null'] += C['Predict_H1x4']['null']
                     cat['Predict_H4x4']['up'] += C['Predict_H4x4']['up']
                     cat['Predict_H4x4']['down'] += C['Predict_H4x4']['down']
                     cat['Predict_H4x4']['null'] += C['Predict_H4x4']['null']
@@ -151,12 +155,13 @@ def FindMatchCat(C):
                     cat['Predict_D1x4']['down'] += C['Predict_D1x4']['down']
                     cat['Predict_D1x4']['null'] += C['Predict_D1x4']['null']
                     with open(str(x), 'wb') as f:              
-                        pickle.dumps(cat, f)
+                        pickle.dump(cat, f)
                     return cat
                 
     if not breakout: 
-        with open(SubDir+str(count)+'.pkl', 'wb') as f:              
-            pickle.dumps(C, f)
+        with open(SubDir+str(count)+'.pkl', 'wb') as f:  
+            # print(C)            
+            pickle.dump(C, f)
         return curent_set
                 
 

@@ -2,6 +2,7 @@ import pandas as pd
 import os
 import numpy as np
 import talib
+from datetime import datetime
 
 class FactorBase():
     def __init__(self, alpha, scale, data_id, data_file, data_start, data_end):
@@ -29,7 +30,7 @@ class FactorBase():
 
 class Price(FactorBase):
     
-    def LoadData(self):      
+    def LoadData(self):  
         df = pd.read_csv(os.path.join(os.path.dirname(os.path.realpath(__file__)), self.data_file + '.csv'))  
         data = df[df.date>self.data_start]   
         data = data[data.date<self.data_end]     
@@ -40,14 +41,16 @@ class Price(FactorBase):
         return dt
 
     def Compare(self, C):
-        vec1 = Price.LoadData()
+        vec1 = self.LoadData()
         vec2 = C.LoadData()
         dist = np.linalg.norm(vec1 - vec2)
         return (dist - self.scale)*self.alpha
 
 class TIME(FactorBase):
     def Compare(self,C):
-        return (abs(self.data_end - C.data_end) - self.scale)*self.alpha
+        thistime = datetime.strptime(self.data_end,'%Y.%m.%d-%H:%M')
+        thattime = datetime.strptime(C.data_end,'%Y.%m.%d-%H:%M')
+        return (abs(thistime.hour - thattime.hour) - self.scale)*self.alpha
 
 class RSI(FactorBase):    
     def LoadData(self):
@@ -64,7 +67,7 @@ class RSI(FactorBase):
         return dt
 
     def Compare(self,C):
-        vec1 = RSI.LoadData()
+        vec1 = self.LoadData()
         vec2 = C.LoadData()
         dist = np.linalg.norm(vec1 - vec2)
         return (dist - self.scale)*self.alpha
@@ -83,7 +86,7 @@ class EMA(FactorBase):
         return dt
 
     def Compare(self,C):
-        vec1 = EMA.LoadData()
+        vec1 = self.LoadData()
         vec2 = C.LoadData()
         dist = np.linalg.norm(vec1 - vec2)
         return (dist - self.scale)*self.alpha
@@ -107,7 +110,7 @@ class MACD(FactorBase):
         return dt1, dt2
 
     def Compare(self,C):
-        vec11,vec12 = MACD.LoadData()
+        vec11,vec12 = self.LoadData()
         vec21,vec22 = C.LoadData()
         dist1 = np.linalg.norm(vec11 - vec21)
         dist2 = np.linalg.norm(vec12 - vec22)
@@ -116,28 +119,29 @@ class MACD(FactorBase):
 def init_factor_set(S):
     out={}
     if S.get('M15'):
-        out['M15'] = Price(*S['M15'])
+        out['M15'] = Price(**S['M15'])
     if S.get('M30'):
-        out['M30'] = Price(*S['M30'])
+        out['M30'] = Price(**S['M30'])
     if S.get('H1'):
-        out['H1'] = Price(*S['H1'])
+        out['H1'] = Price(**S['H1'])
     if S.get('H4'):
-        out['H4'] = Price(*S['H4'])
+        out['H4'] = Price(**S['H4'])
     if S.get('D1'):
-        out['D1'] = Price(*S['D1'])
+        out['D1'] = Price(**S['D1'])
     if S.get('W1'):
-        out['W1'] = Price(*S['W1'])
+        out['W1'] = Price(**S['W1'])
     if S.get('TIME'):
-        out['TIME'] =TIME(*S['TIME'])
+        out['TIME'] =TIME(**S['TIME'])
     if S.get('MACD'):
-        out['MACD'] = MACD(*S['MACD'])
+        out['MACD'] = MACD(**S['MACD'])
     if S.get('RSI'):
-        out['RSI'] = RSI(*S['RSI'])
+        out['RSI'] = RSI(**S['RSI'])
     if S.get('EMA'):
-        out['EMA'] = EMA(*S['EMA'])
+        out['EMA'] = EMA(**S['EMA'])
     return out
 
 def serialize_factor_set(S):
+    # import pdb;pdb.set_trace()    
     out = {}
     for k in S:
         out[k] = S[k].ToJson()
