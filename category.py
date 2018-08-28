@@ -32,6 +32,7 @@ directory of catecory, each pickle file present a category. the pickle file form
     Predict_H1x4
     Predict_H4x4
     Predict_D1x4
+    _id
 }
 """
 
@@ -42,6 +43,7 @@ import json
 from pathlib import Path
 from factor import *
 from datetime import datetime
+import random,string
 
 
 SubDir = './category/eur_m15/'
@@ -59,7 +61,7 @@ def MakeCurrentSet(filebasename,current_time, min_period, day_change, macd_perio
     Returns:
         json -- pickle like obj
     """
-    p_change={'M15':0.3, 'M30':0.3, 'H1':0.4, 'H4':0.5, 'D1':1}
+    p_change={'M15':0.2, 'M30':0.3, 'H1':0.4, 'H4':0.5, 'D1':1}
     valid_p = p_order[p_order.index(min_period):]
     out = {
         'data': []       
@@ -114,6 +116,120 @@ def MakeCurrentSet(filebasename,current_time, min_period, day_change, macd_perio
     out['data'].append(f_set)
     return out
 
+def BuildCat(C):
+    """just build the category to save to pkl.
+    
+    Arguments:
+        C {dict} -- reference to pickle format file description above.    
+    """
+    rand_str = ''.join(random.sample(string.ascii_letters + string.digits, 8))
+    with open(SubDir+rand_str+'.pkl', 'wb') as f:  
+            # print(C) 
+        C['_id'] = rand_str          
+        pickle.dump(C, f)
+    return rand_str
+
+def AddOneCat(C):
+    """add one cat and cal sim at the same time.
+    """
+    cat_list = []
+    for x in Path(SubDir).iterdir():
+        if x.is_file() and x.match('*.pkl'):  
+            with open(str(x), 'rb') as f:
+                cat = pickle.load(f) 
+                cat_list.append(cat)
+    BuildCat(C)
+    with open(SubDir+'result_table.pickle', 'rb') as f:
+        sim_table = pickle.load(f) 
+    
+    for ca in enumerate(cat_list):        
+        key = ca['_id'] + '_'+C['_id']
+        c1 = init_factor_set(ca['data'][0])
+        c2 = init_factor_set(C['data'][0])
+        result = compare_factor_set(c1, c2)
+        print('current compare of ',key,', result is: ',result)
+        sim_table[key] = result
+
+    with open(SubDir+'result_table.pickle', 'wb') as f:  
+        pickle.dump(sim_table, f)
+
+def BuildSimTable():
+    """fistly build the similarity table if it isn't exist.
+
+    Arguments:
+        n {int} -- nth.
+    
+    Returns:
+        nth list factor set.
+    """
+    cat_list = []
+    for x in Path(SubDir).iterdir():
+        if x.is_file() and x.match('*.pkl'):  
+            with open(str(x), 'rb') as f:
+                cat = pickle.load(f) 
+                cat_list.append(cat)
+    result_list = {}
+    for index, ca in enumerate(cat_list):
+        for nn in range(index+1,len(cat_list)):
+            key = ca['_id'] + '_'+cat_list[nn]['_id']
+            c1 = init_factor_set(ca['data'][0])
+            c2 = init_factor_set(cat_list[nn]['data'][0])
+            result = compare_factor_set(c1, c2)
+            print('current compare of ',key,', result is: ',result)
+            result_list[key] = result
+
+    with open(SubDir+'result_table.pickle', 'wb') as f:  
+            # print(C) 
+        pickle.dump(result_list, f)
+
+def CompleteSimTable():
+    """when there are some of pkl file without culculating the sim result, use this function
+    """
+
+    if os.path.exists(SubDir+'result_table.pickle'):
+        with open(SubDir+'result_table.pickle', 'rb') as f:
+            sim_table = pickle.load(f) 
+    else:
+        return BuildSimTable()
+        
+    # sim_tuple = sorted(sim_table.items(), key=lambda d:d[1], reverse = True)  
+
+    file_list = os.listdir(SubDir+'result_table.pickle')
+    if len(file_list) > len(sim_table) +10:
+        cat_list = []
+        for x in Path(SubDir).iterdir():
+            if x.is_file() and x.match('*.pkl'):  
+                with open(str(x), 'rb') as f:
+                    cat = pickle.load(f) 
+                    cat_list.append(cat)
+
+        for index, ca in enumerate(cat_list):
+            for nn in range(index+1,len(cat_list)):
+                key = ca['_id'] + '_'+cat_list[nn]['_id']
+                if sim_table.get(key):
+                    break
+                c1 = init_factor_set(ca['data'][0])
+                c2 = init_factor_set(cat_list[nn]['data'][0])
+                result = compare_factor_set(c1, c2)
+                print('current compare of ',key,', result is: ',result)
+                sim_table[key] = result
+
+        with open(SubDir+'result_table.pickle', 'wb') as f:  
+            pickle.dump(sim_table, f)
+
+def FindFirstN(n=10):
+    """return format [('id',sim_result), (,) ,...]
+    """
+
+    if os.path.exists(SubDir+'result_table.pickle'):
+        with open(SubDir+'result_table.pickle', 'rb') as f:
+            sim_table = pickle.load(f) 
+    else:
+        return BuildSimTable()
+
+    sim_tuple = sorted(sim_table.items(), key=lambda d:d[1], reverse = True)  
+    return sim_tuple[:n]   
+
 def FindMatchCat(C):
     """the main algorithm, when C is belong to a exist category, return this cat.
     else make a new cat.
@@ -166,7 +282,7 @@ def FindMatchCat(C):
             C['_id'] = str(count)           
             pickle.dump(C, f)
         return curent_set
-                
 
 if __name__ == '__main__':
     print('unit test')
+    BuildSimTable()

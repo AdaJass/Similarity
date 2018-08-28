@@ -1,5 +1,5 @@
 import pickle
 
-with open('./category/eur_m15/0.pkl', 'rb') as f:
+with open('./category/eur_m15/result_table.pickle', 'rb') as f:
     data=pickle.load(f)
     print(data)
