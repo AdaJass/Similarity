@@ -110,9 +110,9 @@ class MACD(FactorBase):
         dt_list1 = np.array(data['ind1'])
         dt_list2 = np.array(data['ind2'])
         dtmin, dtmax = dt_list1.min(), dt_list1.max() # 求最大最小值
-        dt1 = (dt_list-dtmin)/(dtmax-dtmin) # (矩阵元素-最小值)/(最大值-最小值)
+        dt1 = (dt_list1-dtmin)/(dtmax-dtmin) # (矩阵元素-最小值)/(最大值-最小值)
         dtmin, dtmax = dt_list2.min(), dt_list2.max() # 求最大最小值
-        dt2 = (dt_list-dtmin)/(dtmax-dtmin) # (矩阵元素-最小值)/(最大值-最小值)
+        dt2 = (dt_list2-dtmin)/(dtmax-dtmin) # (矩阵元素-最小值)/(最大值-最小值)
         return dt1, dt2
 
     def Compare(self,C):

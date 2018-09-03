@@ -35,7 +35,6 @@ directory of catecory, each pickle file present a category. the pickle file form
     _id
 }
 """
-
 import pickle
 import pandas as pd
 import os
@@ -148,7 +147,8 @@ def BuildSimTable2DB(indb, outdb, cp_set):
             result = compare_factor_set(c1, c2, cp_set)
             print('current compare of ',key,', result is: ',result)
             result_list.append({key :result})
-        outdb.insert(result_list)
+        if len(result_list) >0:
+            outdb.insert(result_list)
 
 
 def BuildCat(C):
