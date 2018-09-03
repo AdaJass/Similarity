@@ -44,6 +44,7 @@ from pathlib import Path
 from factor import *
 from datetime import datetime
 import random,string
+from mongoconnect import *
 
 SubDir = './category/eur_m15/'
 f = open(SubDir+'eur_m15_cfg.json')
@@ -147,6 +148,7 @@ def BuildSimTable2DB(indb, outdb, cp_set):
             result = compare_factor_set(c1, c2, cp_set)
             print('current compare of ',key,', result is: ',result)
             result_list.append({key :result})
+        outdb.insert(result_list)
 
 
 def BuildCat(C):
@@ -318,4 +320,4 @@ def FindMatchCat(C):
 
 if __name__ == '__main__':
     print('unit test')
-    BuildSimTable()
+    BuildSimTable2DB(eur_m15, eur_m15_dist,['M15','H4','D1'])

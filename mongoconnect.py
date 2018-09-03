@@ -1,5 +1,5 @@
 from pymongo import MongoClient
-__client = MongoClient('mongodb://127.0.0.1:27017')
+__client = MongoClient('mongodb://admin:%2Bbeijing2017@127.0.0.1:27017')
 
 eur_m15 = __client.forex_category.eur_m15
 eur_m15_dist = __client.forex_category.eur_m15_dist
