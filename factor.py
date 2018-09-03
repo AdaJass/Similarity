@@ -35,8 +35,7 @@ class FactorBase():
         json['data_end'] = self.data_end
         return json
 
-class Price(FactorBase):
-    
+class Price(FactorBase):    
     def LoadData(self):  
         df = df_set[self.data_file]  
         data = df[df.date>self.data_start]   
@@ -154,9 +153,13 @@ def serialize_factor_set(S):
         out[k] = S[k].ToJson()
     return out
 
-def compare_factor_set(S1,S2):
+def compare_factor_set(S1,S2, cp_set=[]):
     cmp=0.0
-    for k in S1:
-        cmp += S1[k].Compare(S2[k])
+    if len(cp_set)>0:
+        for k in cp_set:
+            cmp += S1[k].Compare(S2[k])
+    else:
+        for k in S1:
+            cmp += S1[k].Compare(S2[k])
     print(cmp)
     return cmp

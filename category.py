@@ -45,9 +45,8 @@ from factor import *
 from datetime import datetime
 import random,string
 
-
 SubDir = './category/eur_m15/'
-f = open(SubDir+'cfg.json')
+f = open(SubDir+'eur_m15_cfg.json')
 cat_parameters = json.loads(f.read())
 f.close()
 # p_order = ['M15', 'M30', 'H1', 'H4', 'D1', 'W1']
@@ -55,18 +54,23 @@ f.close()
 # for p in p_order:
 #     df_set[p] = pd.read_csv(os.path.join(os.path.dirname(os.path.realpath(__file__)), filebasename + '_' + p +'.csv'))  
 
-def MakeCurrentSet(filebasename,current_time, min_period, day_change, macd_period='D1', rsi_period='D1', time_period='H1'):
+def MakeCurrentSet(filebasename,current_time, min_period, day_change):
     """make current data to a factor set
     
     Returns:
         json -- pickle like obj
     """
-    p_change={'M15':0.2, 'M30':0.3, 'H1':0.4, 'H4':0.5, 'D1':1}
+    p_change={'M15':0.1, 'M30':0.2, 'H1':0.25, 'H4':0.3, 'D1':0.8}
     valid_p = p_order[p_order.index(min_period):]
     out = {
         'data': []       
     }
     f_set = {}
+    macd_period=cat_parameters.get('MACD_period')
+    rsi_period=cat_parameters.get('RSI_period')
+    time_period=cat_parameters.get('TIME_period')
+    ema_period=cat_parameters.get('EMA_period')
+
     for p in valid_p:
         # import pdb;pdb.set_trace()
         c_index = df_set[p][df_set[p].date <= current_time].index[-1] 
@@ -89,32 +93,61 @@ def MakeCurrentSet(filebasename,current_time, min_period, day_change, macd_perio
             else:
                 out['Predict_'+p+'x4'] = {'up':0,'down':0,'null':1}
     
-    f_set['MACD']={}
-    f_set['MACD']['alpha'] = cat_parameters['MACD_alpha'] 
-    f_set['MACD']['scale'] = cat_parameters['MACD_scale'] 
-    f_set['MACD']['data_id'] = 'MACD'
-    f_set['MACD']['data_file'] = macd_period
-    f_set['MACD']['data_start'] = f_set[macd_period]['data_start']
-    f_set['MACD']['data_end'] = f_set[macd_period]['data_end']
-
-    f_set['RSI']={}
-    f_set['RSI']['alpha'] = cat_parameters['RSI_alpha'] 
-    f_set['RSI']['scale'] = cat_parameters['RSI_scale'] 
-    f_set['RSI']['data_id'] = 'RSI'
-    f_set['RSI']['data_file'] = rsi_period
-    f_set['RSI']['data_start'] = f_set[rsi_period]['data_start']
-    f_set['RSI']['data_end'] = f_set[rsi_period]['data_end']
-
-    f_set['TIME']={}
-    f_set['TIME']['alpha'] = cat_parameters['TIME_alpha'] 
-    f_set['TIME']['scale'] = cat_parameters['TIME_scale'] 
-    f_set['TIME']['data_id'] = 'TIME'
-    f_set['TIME']['data_file'] = time_period
-    f_set['TIME']['data_start'] = f_set[time_period]['data_start']
-    f_set['TIME']['data_end'] = f_set[time_period]['data_end']
+    if cat_parameters.get('MACD_alpha'):
+        f_set['MACD']={}
+        f_set['MACD']['alpha'] = cat_parameters['MACD_alpha'] 
+        f_set['MACD']['scale'] = cat_parameters['MACD_scale'] 
+        f_set['MACD']['data_id'] = 'MACD'
+        f_set['MACD']['data_file'] = macd_period
+        f_set['MACD']['data_start'] = f_set[macd_period]['data_start']
+        f_set['MACD']['data_end'] = f_set[macd_period]['data_end']
+    if cat_parameters.get('RSI_alpha'):
+        f_set['RSI']={}
+        f_set['RSI']['alpha'] = cat_parameters['RSI_alpha'] 
+        f_set['RSI']['scale'] = cat_parameters['RSI_scale'] 
+        f_set['RSI']['data_id'] = 'RSI'
+        f_set['RSI']['data_file'] = rsi_period
+        f_set['RSI']['data_start'] = f_set[rsi_period]['data_start']
+        f_set['RSI']['data_end'] = f_set[rsi_period]['data_end']
+    if cat_parameters.get('TIME_alpha'):
+        f_set['TIME']={}
+        f_set['TIME']['alpha'] = cat_parameters['TIME_alpha'] 
+        f_set['TIME']['scale'] = cat_parameters['TIME_scale'] 
+        f_set['TIME']['data_id'] = 'TIME'
+        f_set['TIME']['data_file'] = time_period
+        f_set['TIME']['data_start'] = f_set[time_period]['data_start']
+        f_set['TIME']['data_end'] = f_set[time_period]['data_end']
+    if cat_parameters.get('MEA_alpha'):
+        f_set['EMA']={}
+        f_set['EMA']['alpha'] = cat_parameters['EMA_alpha'] 
+        f_set['EMA']['scale'] = cat_parameters['EMA_scale'] 
+        f_set['EMA']['data_id'] = 'EMA'
+        f_set['EMA']['data_file'] = ema_period
+        f_set['EMA']['data_start'] = f_set[ema_period]['data_start']
+        f_set['EMA']['data_end'] = f_set[ema_period]['data_end']
 
     out['data'].append(f_set)
     return out
+
+def BuildCat2DB(C, db):
+    """just save the category to database.
+    """
+    rand_str = ''.join(random.sample(string.ascii_letters + string.digits, 8))
+    C['id'] = rand_str          
+    db.insert(C)
+
+def BuildSimTable2DB(indb, outdb, cp_set):
+    cat_list = list(indb.find({}))    
+    for index, ca in enumerate(cat_list):  
+        result_list = []      
+        for nn in range(index+1,len(cat_list)):
+            key = ca['id'] + '_'+cat_list[nn]['id']
+            c1 = init_factor_set(ca['data'][0])
+            c2 = init_factor_set(cat_list[nn]['data'][0])
+            result = compare_factor_set(c1, c2, cp_set)
+            print('current compare of ',key,', result is: ',result)
+            result_list.append({key :result})
+
 
 def BuildCat(C):
     """just build the category to save to pkl.
