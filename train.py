@@ -9,7 +9,7 @@ if __name__ == '__main__':
     # here should be a larger for loop 
     # count the category pickle files 
     # and fine tuning value S to make pickle files little
-    for i in range(1930, 2000, 4):
+    for i in range(1930, len(df), 4):
         current_time = df.iloc[i].date
         cu_set = MakeCurrentSet(filebasename, current_time, min_period, day_change)
         count += 1
