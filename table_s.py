@@ -31,16 +31,16 @@ def build_table_s(indb, outdb):
                 break 
             task.put(cat_list[(ind+j):])
             print('input task by index of: ',ind+j)
-    
-    
+        
         print('try get results...')
         for j in range(10):
             if ind+j >= len(cat_list):
                 break 
-            r = result.get(timeout=100000000000)
-            print('result:%s' % r)
+            r = result.get(timeout=10000000000)
+            # print('result:%s' % r)
+            print('receive %s result.'%j)
+            outdb.insert(r)
 
-        # outdb.insert(r)
 
     manager.shutdown()
     print('master exit')
