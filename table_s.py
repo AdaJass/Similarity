@@ -23,16 +23,22 @@ def build_table_s(indb, outdb):
     print('start server master')
     task = manager.get_task_queue()
     result = manager.get_result_queue()
-    cat_list = list(indb.find({}))    
-    for index, ca in enumerate(cat_list):  
-        task.put(cat_list[index:])
-        print('input task by index of: ',index)
+    cat_list = list(indb.find({}))
+
+    for ind in range(0,len(cat_list),10):    
+        for j in range(10): 
+            if ind+j >= len(cat_list):
+                break 
+            task.put(cat_list[(ind+j):])
+            print('input task by index of: ',ind+j)
     
     
-    print('try get results...')
-    for i in range(len(cat_list)):
-        r = result.get(timeout=100000000000000000000)
-        print('result:%s' % r)
+        print('try get results...')
+        for j in range(10):
+            if ind+j >= len(cat_list):
+                break 
+            r = result.get(timeout=100000000000000000000)
+            print('result:%s' % r)
 
         # outdb.insert(r)
 
