@@ -11,12 +11,12 @@ from multiprocessing.managers import BaseManager
 class QueueManager(BaseManager):
     pass
 
-#由于这个QueueManager只从网络上获取Queue，所以注册时只提供名字即可
+#由于这个QueueManager只从网络上获取Queue，所以注册时只提供名字即可d
 QueueManager.register('get_task_queue')
 QueueManager.register('get_result_queue')
 
 #连接到服务器，也就是运行task_master.py的机器
-server_addr = '127.0.0.1'
+server_addr = 'node0'
 print('connect to server %s...'% server_addr)
 #端口和验证码注意要保持完全一致
 m = QueueManager(address=(server_addr,5000),authkey=b'abc')
