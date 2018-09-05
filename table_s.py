@@ -18,7 +18,7 @@ def return_result_queue():
 def build_table_s(indb, outdb):
     QueueManager.register('get_task_queue',callable=return_task_queue)
     QueueManager.register('get_result_queue',callable=return_result_queue)
-    manager = QueueManager(address=('node0',5000),authkey=b'abc')
+    manager = QueueManager(address=('node0',5002),authkey=b'abc')
     manager.start()
     print('start server master')
     task = manager.get_task_queue()
@@ -37,7 +37,7 @@ def build_table_s(indb, outdb):
         for j in range(10):
             if ind+j >= len(cat_list):
                 break 
-            r = result.get(timeout=100000000000000000000)
+            r = result.get(timeout=100000000000)
             print('result:%s' % r)
 
         # outdb.insert(r)

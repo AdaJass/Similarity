@@ -9,13 +9,13 @@ QueueManager.register('get_result_queue')
 
 server_addr = 'node0'
 print('connect to server %s...'% server_addr)
-m = QueueManager(address=(server_addr,5000),authkey=b'abc')
+m = QueueManager(address=(server_addr,5002),authkey=b'abc')
 m.connect()
 task = m.get_task_queue()
 result = m.get_result_queue()
 while True:
     try:
-        cat_list = task.get(timeout=10000000000)
+        cat_list = task.get(timeout=1000000000)
         print('server data is: ',cat_list[0])
         ca = cat_list[0]
         key1 = ca['id']
