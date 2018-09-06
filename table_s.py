@@ -36,9 +36,11 @@ def build_table_s(indb, outdb):
         for j in range(50):
             if ind+j >= len(cat_list):
                 break 
-            r = result.get(timeout=10000000000)
+            r = result.get(timeout=1800)
             # print('result:%s' % r)
             print('receive %s result.'%j)
+            if not r:
+                continue
             outdb.insert(r)
 
 
