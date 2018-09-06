@@ -24,7 +24,7 @@ def build_table_s(indb, outdb):
     task = manager.get_task_queue()
     result = manager.get_result_queue()
     cat_list = list(indb.find({}))
-
+    time.sleep(150)
     for ind in range(0,len(cat_list),50):    
         for j in range(50): 
             if ind+j >= len(cat_list):
@@ -39,7 +39,7 @@ def build_table_s(indb, outdb):
             r = result.get(timeout=10000000000)
             # print('result:%s' % r)
             print('receive %s result.'%j)
-            # outdb.insert(r)
+            outdb.insert(r)
 
 
     manager.shutdown()
