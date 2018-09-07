@@ -13,6 +13,6 @@ if __name__ == '__main__':
         current_time = df.iloc[i].date
         cu_set = MakeCurrentSet(filebasename, current_time, min_period, day_change)
         count += 1
-        BuildCat2DB(cu_set, eur_d1)
+        BuildCat2DB(cu_set, eur_h4)
         print(count) 
     

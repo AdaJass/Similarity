@@ -11,4 +11,4 @@ eur_d1 = __client.forex_category.eur_d1
 eur_d1_dist = __client.forex_category.eur_d1_dist
 
 if __name__ == '__main__':
-    print(list(eur_m15.find({})))
+    print(list(eur_h4.find({})))
