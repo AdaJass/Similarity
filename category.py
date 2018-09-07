@@ -146,7 +146,7 @@ def BuildSimTable2DB(indb, outdb, cp_set):
             c1 = init_factor_set(ca['data'][0])
             c2 = init_factor_set(cat_list[nn]['data'][0])
             result = compare_factor_set(c1, c2, cp_set)
-            print('current compare of ',key,', result is: ',result)
+            # print('current compare of ',key,', result is: ',result)
             result_list.append({'key1': key1, 'key2':key2, 'result':result})
         if len(result_list) >0:
             outdb.insert(result_list)
