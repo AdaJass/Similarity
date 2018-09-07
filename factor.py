@@ -5,7 +5,7 @@ import talib
 from datetime import datetime
 
 filebasename = './data/EURUSD'
-p_order = ['M15', 'M30', 'H1', 'H4', 'D1', 'W1']
+p_order = ['H4', 'D1', 'W1']
 df_set = {}
 for p in p_order:
     df_set[p] = pd.read_csv(os.path.join(os.path.dirname(os.path.realpath(__file__)), filebasename + '_' + p +'.csv'))  

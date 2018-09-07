@@ -45,8 +45,8 @@ from datetime import datetime
 import random,string
 from mongoconnect import *
 
-SubDir = './category/eur_m15/'
-f = open(SubDir+'eur_m15_cfg.json')
+SubDir = './category/'
+f = open(SubDir+'eur_h4_cfg.json')
 cat_parameters = json.loads(f.read())
 f.close()
 # p_order = ['M15', 'M30', 'H1', 'H4', 'D1', 'W1']
@@ -320,4 +320,4 @@ def FindMatchCat(C):
 
 if __name__ == '__main__':
     print('unit test')
-    BuildSimTable2DB(eur_m15, eur_m15_dist,['M15','H4','D1'])
+    BuildSimTable2DB(eur_h4, eur_h4_dist,['H4','D1','MACD','TIME'])
