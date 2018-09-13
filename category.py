@@ -321,4 +321,4 @@ def FindMatchCat(C):
 
 if __name__ == '__main__':
     print('unit test')
-    BuildSimTable2DB(eur_h4, eur_h4_dist,['H4','D1','MACD','TIME'])
+    BuildSimTable2DB(eur_d1, eur_d1_dist,['D1','W1','MACD','TIME','RSI','EMA'])
