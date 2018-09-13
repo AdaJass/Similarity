@@ -117,7 +117,7 @@ def MakeCurrentSet(filebasename,current_time, min_period, day_change):
         f_set['TIME']['data_file'] = time_period
         f_set['TIME']['data_start'] = f_set[time_period]['data_start']
         f_set['TIME']['data_end'] = f_set[time_period]['data_end']
-    if cat_parameters.get('MEA_alpha'):
+    if cat_parameters.get('EMA_alpha'):
         f_set['EMA']={}
         f_set['EMA']['alpha'] = cat_parameters['EMA_alpha'] 
         f_set['EMA']['scale'] = cat_parameters['EMA_scale'] 
