@@ -219,7 +219,7 @@ def BuildSimTable():
         pickle.dump(result_list, f)
 
 def CompleteSimTable():
-    """when there are some of pkl file without culculating the sim result, use this function
+    """when there are some of p9kl file without culculating the sim result, use this function
     """
 
     if os.path.exists(SubDir+'result_table.pickle'):
