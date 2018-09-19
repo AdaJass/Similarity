@@ -15,4 +15,3 @@ if __name__ == '__main__':
         count += 1
         BuildCat2DB(cu_set, eur_d1)
         print(count) 
-    
