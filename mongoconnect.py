@@ -10,5 +10,16 @@ eur_h4_dist = __client.forex_category.eur_h4_dist
 eur_d1 = __client.forex_category.eur_d1
 eur_d1_dist = __client.forex_category.eur_d1_dist
 
+database ={
+    'eur_m15' : eur_m15,
+    'eur_m15_dist' : eur_m15_dist,
+    'eur_h1' : eur_h1,
+    'eur_h1_dist' : eur_h1_dist,
+    'eur_h4' : eur_h4,
+    'eur_h4_dist' : eur_h4_dist,
+    'eur_d1' : eur_d1,
+    'eur_d1_dist' : eur_d1_dist 
+}
+
 if __name__ == '__main__':
-    print(list(eur_d1_dist.find({})))
+    print(list(eur_d1.find({},projection={'_id':False})))

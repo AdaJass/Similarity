@@ -129,6 +129,70 @@ def MakeCurrentSet(filebasename,current_time, min_period, day_change):
     out['data'].append(f_set)
     return out
 
+def MakeLiveSet(filebasename, current_time, min_period, day_change):
+    p_change={'M15':0.1, 'M30':0.2, 'H1':0.25, 'H4':0.3, 'D1':0.8}
+    valid_p = p_order[p_order.index(min_period):]
+    out = {
+        'data': []       
+    }
+    f_set = {}
+    macd_period=cat_parameters.get('MACD_period')
+    rsi_period=cat_parameters.get('RSI_period')
+    time_period=cat_parameters.get('TIME_period')
+    ema_period=cat_parameters.get('EMA_period')
+
+    for p in valid_p:
+        # import pdb;pdb.set_trace()
+        c_index = df_set[p][df_set[p].date <= current_time].index[-1] 
+        f_set[p]={}
+        #alpha, scale, data_id, data_file, data_start, data_end
+        f_set[p]['alpha'] = cat_parameters[p+'_alpha'] 
+        f_set[p]['scale'] = cat_parameters[p+'_scale'] 
+        f_set[p]['data_id'] = p
+        f_set[p]['data_file'] = p
+        s_index = c_index - cat_parameters[p+'_length']
+        f_set[p]['data_start'] = df_set[p].iloc[s_index].date
+        f_set[p]['data_end'] = df_set[p].iloc[c_index].date
+        
+        if not p == 'W1':            
+            out['Predict_'+p+'x4'] = {'up':0,'down':0,'null':0}
+    
+    if cat_parameters.get('MACD_alpha'):
+        f_set['MACD']={}
+        f_set['MACD']['alpha'] = cat_parameters['MACD_alpha'] 
+        f_set['MACD']['scale'] = cat_parameters['MACD_scale'] 
+        f_set['MACD']['data_id'] = 'MACD'
+        f_set['MACD']['data_file'] = macd_period
+        f_set['MACD']['data_start'] = f_set[macd_period]['data_start']
+        f_set['MACD']['data_end'] = f_set[macd_period]['data_end']
+    if cat_parameters.get('RSI_alpha'):
+        f_set['RSI']={}
+        f_set['RSI']['alpha'] = cat_parameters['RSI_alpha'] 
+        f_set['RSI']['scale'] = cat_parameters['RSI_scale'] 
+        f_set['RSI']['data_id'] = 'RSI'
+        f_set['RSI']['data_file'] = rsi_period
+        f_set['RSI']['data_start'] = f_set[rsi_period]['data_start']
+        f_set['RSI']['data_end'] = f_set[rsi_period]['data_end']
+    if cat_parameters.get('TIME_alpha'):
+        f_set['TIME']={}
+        f_set['TIME']['alpha'] = cat_parameters['TIME_alpha'] 
+        f_set['TIME']['scale'] = cat_parameters['TIME_scale'] 
+        f_set['TIME']['data_id'] = 'TIME'
+        f_set['TIME']['data_file'] = time_period
+        f_set['TIME']['data_start'] = f_set[time_period]['data_start']
+        f_set['TIME']['data_end'] = f_set[time_period]['data_end']
+    if cat_parameters.get('EMA_alpha'):
+        f_set['EMA']={}
+        f_set['EMA']['alpha'] = cat_parameters['EMA_alpha'] 
+        f_set['EMA']['scale'] = cat_parameters['EMA_scale'] 
+        f_set['EMA']['data_id'] = 'EMA'
+        f_set['EMA']['data_file'] = ema_period
+        f_set['EMA']['data_start'] = f_set[ema_period]['data_start']
+        f_set['EMA']['data_end'] = f_set[ema_period]['data_end']
+
+    out['data'].append(f_set)
+    return out
+
 def BuildCat2DB(C, db):
     """just save the category to database.
     """
