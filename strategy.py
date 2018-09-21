@@ -46,4 +46,17 @@ def PatternRate(pattern):
     return up, down, null
 
 if __name__ == '__main__':
-    pass
+    min_period = 'D1'
+    day_change = 0.008
+    df = pd.read_csv(os.path.join(os.path.dirname(os.path.realpath(__file__)), filebasename + '_'+min_period+'.csv'))  
+    # here should be a larger for loop 
+    # count the category pickle files 
+    # and fine tuning value S to make pickle files little
+    decision, right_decision = 0,0
+    for i in range(15690, len(df), 3):
+        current_time = df.iloc[i].date
+        cu_set = MakeCurrentSet(filebasename, current_time, min_period, day_change)
+        up,down,null = PatternRate(cu_set)
+
+
+        
