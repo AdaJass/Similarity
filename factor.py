@@ -161,5 +161,5 @@ def compare_factor_set(S1,S2, cp_set=[]):
     else:
         for k in S1:
             cmp += S1[k].Compare(S2[k])
-    print(cmp)
+    # print(cmp)
     return cmp
