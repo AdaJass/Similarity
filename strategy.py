@@ -2,7 +2,7 @@ from mongoconnect import *
 from category import *
 
 para_period = 'd1'
-para_percent = 20
+para_percent = 1000
 compare_set = ['D1','W1','MACD','TIME','RSI','EMA']
 db_dist = database['eur_'+para_period+'_dist']
 db_pattern = database['eur_'+para_period]
@@ -15,6 +15,7 @@ for pt in pattern_list:
     pattern_dict[pt['id']] = pt
 
 percent_dist_list = dist_list[:int(len(dist_list)/para_percent)]
+print(len(percent_dist_list))
 treshold = percent_dist_list[-1]['result']
 
 def PatternRate(pattern):
@@ -53,10 +54,30 @@ if __name__ == '__main__':
     # count the category pickle files 
     # and fine tuning value S to make pickle files little
     decision, right_decision = 0,0
-    for i in range(15690, len(df), 3):
+    for i in range(6690, len(df), 3):
         current_time = df.iloc[i].date
         cu_set = MakeCurrentSet(filebasename, current_time, min_period, day_change)
         up,down,null = PatternRate(cu_set)
+        predict = cu_set['Predict_'+min_period+'x4']
+        if up + down > null*2:
+            if up > down*1.5:
+                trend = 1
+                decision +=1
+            if down > up*1.5:
+                trend = -1
+                decision +=1
+            else:
+                trend = 2
+        else:
+            trend = 0
+        if trend == -1 and predict['down']:
+            right_decision +=1
+        if trend ==1 and predict['up']:
+            right_decision +=1
+        
+        print('decision {} times, right decision is {}'.format(decision,right_decision))
+    
+            
 
 
         
